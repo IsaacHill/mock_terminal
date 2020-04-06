@@ -1,0 +1,31 @@
+@font-face {
+    font-family: bitWise;
+    src: url(Bitwise-m19x.ttf);
+  }
+
+
+body {
+    background-color: black;
+}
+
+.terminalContainer {
+    width:100%;
+    height:100%;
+    background-color:black;
+    color: chartreuse;
+    font-family: bitWise;
+    letter-spacing: 3px;
+    margin-left: 5em;
+}
+
+.terminalContainer > img {
+    height: 10em;
+}
+
+.node {
+    padding:5px;
+}
+.selectedNode {
+    background-color: chartreuse;
+    color: black;
+}

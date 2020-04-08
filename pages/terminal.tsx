@@ -1,6 +1,7 @@
 import * as terminalLib from "../lib/terminal";
 import {useEventListener} from "../lib/useEventListner"
-import React, {useState, useEffect} from "react"
+import React, {useState, useEffect, useCallback} from "react"
+import { TypeWriter } from "../components/TypeWriter";
 
 let other_node = new terminalLib.FileNode(
   "Lead Scientist",
@@ -16,48 +17,47 @@ child_nodes.addChildNode(other_node);
 let terminal = new terminalLib.Terminal("TomorrowLand arcane inquiry", null, fileNodeTree)
 
 export default function Terminal() {
-const [current_node, set_current_node] = useState<terminalLib.FileNode>(terminal.initial_node);
-const [node_index, setNodeIndex] = useState(0);
+const [current_node, setCurrentNode] = useState<terminalLib.FileNode>(terminal.initial_node);
+const [node_index, setNodeIndex] = useState<number>(0);
 
-  function keyboard_event(e ) {
-    console.log("event");
-    console.log(e.key);
-    console.log(current_node.name);
-    let value = 0;
-    if (e.key == "ArrowUp") {
-     value--;
-    } else if(e.key == "ArrowDown") {
-      value++;
-    }
-    console.log(value);
-    setNodeValue(value);
-  }
+  const keyboard_event =  useCallback(
+    ({ key }) => {
+      if (key == "Enter") {
+        setCurrentNode(current_node.PossibleSelections()[node_index]);
+        return
+      }
+      let index = node_index
+      if (key == "ArrowUp") {
+        index = index === 0 ? current_node.PossibleSelections().length-1 : index-1;
+      } else if(key == "ArrowDown") {
+        index = index === current_node.PossibleSelections().length ? 0 : index+1;
+      }
+
+      setNodeIndex(index)
+    },
+    [setNodeIndex, node_index, current_node]
+  );
+  
    
-  const setNodeValue = (value) => {
-    console.log("function node",node_index);
-    setNodeIndex(node_index+value)
-  }
-  useEventListener("keydown", keyboard_event)
+    useEventListener("keydown", keyboard_event)
   // https://usehooks.com/useEventListener/ <===== investigate
 
   useEffect(() => {
-    console.log("reset index");
     setNodeIndex(0);
   }, [current_node]);
 
   useEffect(() => {
-    console.log("triggered change",node_index);
   },[node_index])
 
     return (
       <div className="terminalContainer">
-        <p>{terminal.name}</p>
-        <p>{current_node.Path()}</p>
+        <TypeWriter speed={10}>{terminal.name}</TypeWriter>
+        <TypeWriter speed={12}>{current_node.Path()}</TypeWriter>
         {current_node.image_path ? <img src={current_node.image_path} /> : null}
-        <p>{current_node.info}</p>
+        <TypeWriter speed={5}>{current_node.info}</TypeWriter>
         <div>
           {current_node.PossibleSelections().map((node: terminalLib.FileNode, index: number) => {
-            return <p key={node.name} className={`${index === node_index ? "selectedNode" : ""} node`} onClick={() => set_current_node(node)}>{node.name}</p>
+            return <p key={node.name} className={`${index === node_index ? "selectedNode" : ""} node`} onClick={() => setCurrentNode(current_node.PossibleSelections()[index]) }>{node.name}</p>
           })}
         </div>
       </div>
